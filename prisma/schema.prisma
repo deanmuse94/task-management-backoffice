@@ -1,0 +1,32 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider     = "mysql"
+    url          = env("DATABASE_URL")
+    relationMode = "prisma"
+}
+
+model Fault {
+    id           Int      @id @default(autoincrement())
+    description  String
+    status       String
+    reported_at  DateTime @default(now())
+    updated_at   DateTime @default(now())
+    resoloved_at DateTime
+    reporter_id  String
+    user         User?    @relation(fields: [reporter_id], references: [id])
+
+    @@index([reporter_id])
+}
+
+model User {
+    id             String  @id
+    is_admin       Boolean @default(false)
+    full_name      String
+    address        String
+    email          String
+    account_number String
+    Fault          Fault[]
+}
