@@ -1,118 +1,233 @@
-import Image from 'next/image'
-import { Inter } from 'next/font/google'
-
-const inter = Inter({ subsets: ['latin'] })
+import { API } from '@/lib/API';
+import { useUser } from '@/hooks/useUser';
+import { Auth } from 'aws-amplify';
+import { useRouter } from 'next/router';
+import { useAccount } from '@/store/useAccount';
+import {
+	Button,
+	Card,
+	Grid,
+	Title,
+	Text,
+	Tab,
+	TabList,
+	TabGroup,
+	TabPanel,
+	TabPanels,
+	Flex,
+	BarList,
+	Bold,
+	Table,
+	TableRow,
+	TableCell,
+	TableHead,
+	TableHeaderCell,
+	TableBody,
+	Badge,
+	Color,
+	DatePicker,
+	Select,
+	SelectItem,
+	List,
+	ListItem,
+} from '@tremor/react';
+import { Container } from 'react-bootstrap';
+import { useEffect, useState } from 'react';
+import SuperUserForm from '@/components/SuperUserForm';
+import NotFound from '@/components/NotFound';
 
 export default function Home() {
-  return (
-    <main
-      className={`flex min-h-screen flex-col items-center justify-between p-24 ${inter.className}`}
-    >
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/pages/index.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
+	const { isLoggedIn, user } = useUser();
+	const updateUser = useAccount((state) => state.updateAttributes);
+	const updateToken = useAccount((state) => state.updateAccessToken);
+	const router = useRouter();
 
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700/10 after:dark:from-sky-900 after:dark:via-[#0141ff]/40 before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
+	const handleAdd = () => {
+		console.log('hello there');
+		API({ url: '/api/hello' });
+	};
 
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
+	const handleLogout = async () => {
+		await Auth.signOut();
+		router.push('/login');
+		updateUser(null);
+		updateToken('');
+	};
 
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
+	const data: any = [
+		{
+			name: 'Fibre Optic',
+			value: 456,
+			color: 'emerald',
+		},
+		{
+			name: 'Copper',
+			value: 351,
+			color: 'blue',
+		},
+	];
 
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Discover and deploy boilerplate example Next.js&nbsp;projects.
-          </p>
-        </a>
+	const transactions = [
+		{
+			transactionID: '#123456',
+			user: 'Lena Mayer',
+			item: 'Under Armour Shorts',
+			status: 'Ready for dispatch',
+		},
+		{
+			transactionID: '#234567',
+			user: 'Max Smith',
+			item: 'Book - Wealth of Nations',
+			status: 'Ready for dispatch',
+		},
+		{
+			transactionID: '#345678',
+			user: 'Anna Stone',
+			item: 'Garmin Forerunner 945',
+			status: 'Cancelled',
+		},
+	];
 
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
+	const cities = [
+		{
+			city: 'Athens',
+			rating: '2 open PR',
+		},
+		{
+			city: 'Luzern',
+			rating: '1 open PR',
+		},
+		{
+			city: 'Zürich',
+			rating: '0 open PR',
+		},
+		{
+			city: 'Vienna',
+			rating: '1 open PR',
+		},
+		{
+			city: 'Ermatingen',
+			rating: '0 open PR',
+		},
+		{
+			city: 'Lisbon',
+			rating: '0 open PR',
+		},
+	];
+
+	const colors: { [key: string]: Color } = {
+		'Ready for dispatch': 'gray',
+		Cancelled: 'rose',
+		Shipped: 'emerald',
+	};
+
+	if (user && user?.isSuperUser)
+		return (
+			<Container>
+				<SuperUserForm />
+			</Container>
+		);
+	else if (user && user?.isAdmin)
+		return (
+			<Container className="pt-10">
+				<Flex justifyContent="between">
+					<Title>{user?.designation} Admin dashboard</Title>
+					<Button className="border-0" onClick={() => handleLogout()}>
+						Logout
+					</Button>
+				</Flex>
+				<Text>
+					Exchange admin: <strong>{user?.firstName + ' ' + user?.lastName}</strong>
+				</Text>
+				<TabGroup className="mt-6">
+					<TabList>
+						<Tab>Page 1</Tab>
+						<Tab>Page 2</Tab>
+					</TabList>
+					<TabPanels>
+						<TabPanel>
+							<Grid numItemsMd={2} numItemsLg={2} className="gap-6 mt-6">
+								<Card className="max-h-[250px] overflow-auto">
+									<Flex justifyContent="between" className="mb-3">
+										<Title>Technician tasks</Title>
+										<Button size="xs" color="green" className="border-0">
+											Add technician
+										</Button>
+									</Flex>
+									<List className="pl-0">
+										{cities.map((item) => (
+											<ListItem key={item.city}>
+												<span>{item.city}</span>
+												<span>{item.rating}</span>
+											</ListItem>
+										))}
+									</List>
+								</Card>
+								<Card className="h-20px">
+									<Title>Fault Statistics</Title>
+									<Flex className="mt-4">
+										<Text>
+											<Bold>Internet Service</Bold>
+										</Text>
+										<Text>
+											<Bold>Faults</Bold>
+										</Text>
+									</Flex>
+									<BarList data={data} className="mt-2" />
+								</Card>
+							</Grid>
+							<div className="mt-6">
+								<Card className="h-[450px] overflow-auto">
+									<Flex justifyContent="between" className="space-x-2">
+										<Flex justifyContent="start">
+											<Title className="mr-2">Faults in {user?.designation}</Title>
+											<Badge color="red">8</Badge>
+										</Flex>
+										<DatePicker className="max-w-sm" defaultValue={new Date()} />
+									</Flex>
+
+									<Table className="mt-6">
+										<TableHead>
+											<TableRow>
+												<TableHeaderCell>Fault Ref</TableHeaderCell>
+												<TableHeaderCell>Report Name</TableHeaderCell>
+												<TableHeaderCell>Service</TableHeaderCell>
+												<TableHeaderCell>Status</TableHeaderCell>
+												<TableHeaderCell>Action fault</TableHeaderCell>
+											</TableRow>
+										</TableHead>
+										<TableBody>
+											{transactions.map((item) => (
+												<TableRow key={item.transactionID}>
+													<TableCell>{item.transactionID}</TableCell>
+													<TableCell>{item.user}</TableCell>
+													<TableCell>{item.item}</TableCell>
+													<TableCell>
+														<Badge color={colors[item.status]} size="xs">
+															{item.status}
+														</Badge>
+													</TableCell>
+													<TableCell>
+														<div className="flex">
+															<Select placeholder="Action fault" className="mr-2">
+																<SelectItem value="1">Assign technician</SelectItem>
+																<SelectItem value="2">Mark as resolved</SelectItem>
+																<SelectItem value="3">Close fault</SelectItem>
+															</Select>
+															<Button size="sm">Apply</Button>
+														</div>
+													</TableCell>
+												</TableRow>
+											))}
+										</TableBody>
+									</Table>
+								</Card>
+							</div>
+						</TabPanel>
+					</TabPanels>
+				</TabGroup>
+			</Container>
+		);
+	else if (user && user?.isTechnician) return 'technician view';
+	else return <NotFound />;
 }

@@ -16,17 +16,32 @@ model Fault {
     updated_at   DateTime @default(now())
     resoloved_at DateTime
     reporter_id  String
+    service_type String
     user         User?    @relation(fields: [reporter_id], references: [id])
+    Admin        Admin?   @relation(fields: [admin_id], references: [id])
+    admin_id     String?
 
-    @@index([reporter_id])
+    @@index([reporter_id, admin_id])
 }
 
 model User {
     id             String  @id
-    is_admin       Boolean @default(false)
     full_name      String
     address        String
     email          String
     account_number String
+    location       String
     Fault          Fault[]
+    admin_id       String
+    admin          Admin?  @relation(fields: [admin_id], references: [id])
+
+    @@index([admin_id])
+}
+
+model Admin {
+    id       String  @id
+    email    String
+    location String
+    User     User[]
+    Fault    Fault[]
 }
