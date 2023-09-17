@@ -1,8 +1,9 @@
 import { IFaults } from '@/pages';
-import { UserAttributes } from '@/store/useAccount';
+import { UserAttributes, useAccount } from '@/store/useAccount';
 import {
 	Badge,
 	Button,
+	Flex,
 	Subtitle,
 	Tab,
 	TabGroup,
@@ -22,11 +23,17 @@ import useSWR from 'swr';
 import { prisma } from '@/lib/primsa';
 import { API } from '@/lib/API';
 import { toast } from 'react-toastify';
+import { Auth } from 'aws-amplify';
+import { useRouter } from 'next/router';
 
 export default function TechnicianView({ user, data }: { user: UserAttributes; data: IFaults | undefined }) {
 	const [modal, setModal] = useState<boolean>(false);
 	const [loadingOne, setLoadingOne] = useState(false);
 	const [loadingTwo, setLoadingTwo] = useState(false);
+	const updateUser = useAccount((state) => state.updateAttributes);
+	const updateToken = useAccount((state) => state.updateAccessToken);
+	const router = useRouter();
+
 	const [faultData, setFaultData] = useState<{
 		id: number;
 		description: string;
@@ -39,13 +46,31 @@ export default function TechnicianView({ user, data }: { user: UserAttributes; d
 		service_type: 'fibre' | 'ADSL';
 	}>();
 
+	const handleLogout = async () => {
+		try {
+			await Auth.signOut();
+			router.push('/login');
+			updateUser(null);
+			updateToken('');
+		} catch (error: any) {
+			toast.error((error && error.message) || 'Something went wrong, please try again', {
+				position: toast.POSITION.TOP_RIGHT,
+			});
+		}
+	};
+
 	return (
 		<Container className="pt-10">
 			<TabGroup>
 				<TabList>
 					<Tab>Assigned faults</Tab>
 				</TabList>
-				<Subtitle className="mt-4">{user && user?.firstName + ' ' + user?.lastName}'s Fault list</Subtitle>
+				<Flex className="mt-3">
+					<Subtitle>{user && user?.firstName + ' ' + user?.lastName}'s Fault list</Subtitle>
+					<Button onClick={() => handleLogout()} color="blue" size="xs" className="border-0">
+						Logout
+					</Button>
+				</Flex>
 				{data && data?.faults.length > 0 ? (
 					<Table className="mt-6">
 						<TableHead>
