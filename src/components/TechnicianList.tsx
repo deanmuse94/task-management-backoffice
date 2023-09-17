@@ -30,7 +30,7 @@ export default function TechnicianList({ user, faults }: { user: any; faults: an
 			{data && data.technicians.length === 0 && <p>No data found</p>}
 			{data &&
 				data.technicians.map((tech, index) => {
-					const faultsAssigned = faults && faults.filter((f) => f.technician_id === tech.id && f.status === 'technician_dispatched').length;
+					const faultsAssigned = faults && faults.filter((f: any) => f.technician_id === tech.id && f.status === 'technician_dispatched').length;
 					return (
 						<ListItem key={index}>
 							<span>{tech.admin_name}</span>
