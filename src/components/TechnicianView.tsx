@@ -66,7 +66,7 @@ export default function TechnicianView({ user, data }: { user: UserAttributes; d
 					<Tab>Assigned faults</Tab>
 				</TabList>
 				<Flex className="mt-3">
-					<Subtitle>{user && user?.firstName + ' ' + user?.lastName}'s Fault list</Subtitle>
+					<Subtitle>{user && user?.firstName + ' ' + user?.lastName + "'s"} Fault list</Subtitle>
 					<Button onClick={() => handleLogout()} color="blue" size="xs" className="border-0">
 						Logout
 					</Button>
