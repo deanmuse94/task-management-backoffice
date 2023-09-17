@@ -4,7 +4,6 @@ import { useRouter } from 'next/router';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-// import { useAccount } from '@/store/useAccount';
 import Modal from 'react-bootstrap/Modal';
 import { Button, TextInput } from '@tremor/react';
 import { Card, Metric, Text } from '@tremor/react';
@@ -162,7 +161,7 @@ export default function Login() {
 
 							const userAttributes = loggedInUser.challengeParam.userAttributes;
 
-							if (Boolean(Number(userAttributes['custom:is_admin']))) {
+							if (Boolean(Number(userAttributes['custom:is_admin'])) || Boolean(Number(userAttributes['custom:is_technician']))) {
 								await API({
 									url: '/api/create-admin',
 									method: 'POST',
@@ -170,9 +169,24 @@ export default function Login() {
 										id: loggedInUser.username,
 										email: userAttributes.email,
 										location: userAttributes['custom:designation'],
+										is_technician: userAttributes['custom:is_technician'] ? true : false,
+										admin_name: userAttributes.given_name + ' ' + userAttributes.family_name,
 									},
 								});
 							}
+
+							// if (Boolean(Number(userAttributes['custom:is_technician']))) {
+							// 	console.log(userAttributes);
+							// 	await API({
+							// 		url: '/api/create-technician',
+							// 		method: 'POST',
+							// 		data: {
+							// 			email: userAttributes.email,
+							// 			tech_name: userAttributes.given_name + ' ' + userAttributes.family_name,
+							// 			admin_id: userAttributes['custom:designation'],
+							// 		},
+							// 	});
+							// }
 
 							updateUserAttributes({
 								email: userAttributes.email,

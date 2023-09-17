@@ -9,17 +9,21 @@ datasource db {
 }
 
 model Fault {
-    id           Int      @id @default(autoincrement())
-    description  String
-    status       String
-    reported_at  DateTime @default(now())
-    updated_at   DateTime @default(now())
-    resoloved_at DateTime
-    reporter_id  String
-    service_type String
-    admin_id     String?
-    user         User?    @relation(fields: [reporter_id], references: [id])
-    Admin        Admin?   @relation(fields: [admin_id], references: [id])
+    id                     Int      @id @default(autoincrement())
+    reporter_name          String
+    reporter_account_nuber String
+    description            String
+    status                 String
+    reported_at            DateTime @default(now())
+    updated_at             DateTime @default(now())
+    resoloved_at           DateTime
+    reporter_id            String
+    service_type           String
+    admin_id               String?
+    // technician_id          Int?
+    user                   User?    @relation(fields: [reporter_id], references: [id])
+    Admin                  Admin?   @relation(fields: [admin_id], references: [id])
+    // Technicians            Technicians? @relation(fields: [technician_id], references: [id])
 
     @@index([reporter_id, admin_id])
 }
@@ -46,11 +50,25 @@ model Exchange {
     @@index([admin_id])
 }
 
+// model Technicians {
+//     id        Int     @id @default(autoincrement())
+//     email     String
+//     tech_name String
+//     Fault     Fault[]
+//     admin_id  String
+//     admin     Admin?  @relation(fields: [admin_id], references: [id])
+
+//     @@index([admin_id])
+// }
+
 model Admin {
-    id       String     @id
-    email    String
-    location String
-    User     User[]
-    Fault    Fault[]
-    Exchange Exchange[]
+    id            String     @id
+    email         String
+    location      String
+    User          User[]
+    Fault         Fault[]
+    Exchange      Exchange[]
+    is_technician Boolean
+    admin_name    String
+    // Technicians Technicians[]
 }
