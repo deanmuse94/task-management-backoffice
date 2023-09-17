@@ -42,6 +42,9 @@ import { toast } from 'react-toastify';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
+import TechnicianList from '@/components/TechnicianList';
+import dateFormat from 'dateformat';
+import AssignTechnician from '@/components/AssingTechnician';
 
 export interface IFaults {
 	faults: {
@@ -53,7 +56,7 @@ export interface IFaults {
 		reporter_id: string;
 		reporter_name: string;
 		reporter_account_nuber: string;
-		service_type: string;
+		service_type: 'fibre' | 'ADSL';
 	}[];
 }
 
@@ -97,72 +100,21 @@ export default function Home() {
 		resolver: yupResolver(UpdateFaultSchema),
 	});
 
+	const fibreReports = data && data?.faults.filter((report) => report.service_type === 'fibre').length;
+	const adslReports = data && data?.faults.filter((report) => report.service_type === 'ADSL').length;
+
 	const barListData: any = [
 		{
 			name: 'Fibre Optic',
-			value: 456,
+			value: fibreReports || 0,
 			color: 'emerald',
 		},
 		{
 			name: 'Copper',
-			value: 351,
+			value: adslReports || 0,
 			color: 'blue',
 		},
 	];
-
-	const transactions = [
-		{
-			transactionID: '#123456',
-			user: 'Lena Mayer',
-			item: 'Under Armour Shorts',
-			status: 'Ready for dispatch',
-		},
-		{
-			transactionID: '#234567',
-			user: 'Max Smith',
-			item: 'Book - Wealth of Nations',
-			status: 'Ready for dispatch',
-		},
-		{
-			transactionID: '#345678',
-			user: 'Anna Stone',
-			item: 'Garmin Forerunner 945',
-			status: 'Cancelled',
-		},
-	];
-
-	const cities = [
-		{
-			city: 'Athens',
-			rating: '2 open PR',
-		},
-		{
-			city: 'Luzern',
-			rating: '1 open PR',
-		},
-		{
-			city: 'Zürich',
-			rating: '0 open PR',
-		},
-		{
-			city: 'Vienna',
-			rating: '1 open PR',
-		},
-		{
-			city: 'Ermatingen',
-			rating: '0 open PR',
-		},
-		{
-			city: 'Lisbon',
-			rating: '0 open PR',
-		},
-	];
-
-	const colors: { [key: string]: Color } = {
-		'Ready for dispatch': 'gray',
-		Cancelled: 'rose',
-		Shipped: 'emerald',
-	};
 
 	if (user && user?.isSuperUser)
 		return (
@@ -185,7 +137,6 @@ export default function Home() {
 				<TabGroup className="mt-6">
 					<TabList>
 						<Tab>Page 1</Tab>
-						<Tab>Page 2</Tab>
 					</TabList>
 					<TabPanels>
 						<TabPanel>
@@ -197,14 +148,7 @@ export default function Home() {
 											Add technician
 										</Button>
 									</Flex>
-									<List className="pl-0">
-										{cities.map((item) => (
-											<ListItem key={item.city}>
-												<span>{item.city}</span>
-												<span>{item.rating}</span>
-											</ListItem>
-										))}
-									</List>
+									<TechnicianList user={user} faults={data && data?.faults} />
 								</Card>
 								<Card className="h-20px">
 									<Title>Fault Statistics</Title>
@@ -224,9 +168,9 @@ export default function Home() {
 									<Flex justifyContent="between" className="space-x-2">
 										<Flex justifyContent="start">
 											<Title className="mr-2">Faults in {user?.designation}</Title>
-											<Badge color="red">8</Badge>
+											<Badge color="red">{data && data?.faults.length}</Badge>
 										</Flex>
-										<DatePicker className="max-w-sm" defaultValue={new Date()} />
+										{/* <DatePicker className="max-w-sm" defaultValue={new Date()} /> */}
 									</Flex>
 									{data && data?.faults.length > 0 ? (
 										<Table className="mt-6">
@@ -234,7 +178,7 @@ export default function Home() {
 												<TableRow>
 													<TableHeaderCell>Fault Ref</TableHeaderCell>
 													<TableHeaderCell>Reporter Name</TableHeaderCell>
-													<TableHeaderCell>Service</TableHeaderCell>
+													<TableHeaderCell>Date Reported</TableHeaderCell>
 													<TableHeaderCell>Status</TableHeaderCell>
 													<TableHeaderCell>Action fault</TableHeaderCell>
 												</TableRow>
@@ -244,15 +188,31 @@ export default function Home() {
 													<TableRow key={fault?.id}>
 														<TableCell>#{fault?.id}</TableCell>
 														<TableCell>{fault?.reporter_name}</TableCell>
-														<TableCell>{fault?.service_type}</TableCell>
+														<TableCell>{dateFormat(fault?.reported_at)}</TableCell>
 														<TableCell>
-															<Badge color={'amber'} size="xs">
+															<Badge
+																color={
+																	fault?.status === 'created'
+																		? 'amber'
+																		: fault?.status === 'technician_dispatched'
+																		? 'blue'
+																		: fault?.status === 'resolved'
+																		? 'emerald'
+																		: fault?.status === 'shelved'
+																		? 'red'
+																		: fault?.status === 'canceled'
+																		? 'amber'
+																		: 'blue'
+																}
+																size="xs"
+															>
 																{fault?.status}
 															</Badge>
 														</TableCell>
 														<TableCell>
 															<div className="flex">
 																<Button
+																	disabled={fault?.status !== 'created'}
 																	size="sm"
 																	className="border-0"
 																	onClick={() => {
@@ -293,9 +253,6 @@ export default function Home() {
 					</TabPanels>
 				</TabGroup>
 				<Modal show={modal.open} onHide={() => setModal({ open: false, type: '' })}>
-					<Modal.Header>
-						<Modal.Title>Add technician account</Modal.Title>
-					</Modal.Header>
 					{modal.type === 'add-technician' ? (
 						<form
 							onSubmit={handleSubmit(async (data: FaultInputs) => {
@@ -356,31 +313,7 @@ export default function Home() {
 							</Modal.Footer>
 						</form>
 					) : modal.type === 'action-fault' ? (
-						<form
-							onSubmit={handleSubmit(async (data: FaultInputs) => {
-								try {
-								} catch (error: any) {
-									toast.error((error && error.message) || 'Something went wrong, please try again', {
-										position: toast.POSITION.TOP_RIGHT,
-									});
-								}
-							})}
-						>
-							<Modal.Body>
-								<Subtitle>Assign to technician</Subtitle>
-								<br />
-								<Select placeholder="Select technician" className="">
-									<SelectItem value="1">Assign technician</SelectItem>
-									<SelectItem value="2">Mark as resolved</SelectItem>
-									<SelectItem value="3">Close fault</SelectItem>
-								</Select>
-							</Modal.Body>
-							<Modal.Footer>
-								<Button size="sm" type="submit" className="border-0" loading={isSubmitting}>
-									Update Password
-								</Button>
-							</Modal.Footer>
-						</form>
+						<AssignTechnician user={user} faultData={faultData} setModal={setModal} />
 					) : null}
 				</Modal>
 			</Container>
