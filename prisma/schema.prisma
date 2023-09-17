@@ -17,9 +17,9 @@ model Fault {
     resoloved_at DateTime
     reporter_id  String
     service_type String
+    admin_id     String?
     user         User?    @relation(fields: [reporter_id], references: [id])
     Admin        Admin?   @relation(fields: [admin_id], references: [id])
-    admin_id     String?
 
     @@index([reporter_id, admin_id])
 }
@@ -38,10 +38,20 @@ model User {
     @@index([admin_id])
 }
 
+model Exchange {
+    id       Int    @id @default(autoincrement())
+    name     String
+    admin_id String
+    admin    Admin? @relation(fields: [admin_id], references: [id])
+
+    @@index([admin_id])
+}
+
 model Admin {
-    id       String  @id
+    id       String     @id
     email    String
     location String
     User     User[]
     Fault    Fault[]
+    Exchange Exchange[]
 }

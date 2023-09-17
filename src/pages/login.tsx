@@ -12,6 +12,7 @@ import { Container } from 'react-bootstrap';
 import { useAccount } from '@/store/useAccount';
 import { toast } from 'react-toastify';
 import Link from 'next/link';
+import { API } from '@/lib/API';
 
 interface LoginInputs {
 	email: string;
@@ -155,29 +156,46 @@ export default function Login() {
 				</Modal.Header>
 				<form
 					onSubmit={handleSubmitTwo(async (data: NewPasswordInputs) => {
-						const newPassword = data.new_password;
-						const loggedInUser = await Auth.completeNewPassword(user, newPassword);
+						try {
+							const newPassword = data.new_password;
+							const loggedInUser = await Auth.completeNewPassword(user, newPassword);
 
-						console.log(loggedInUser);
+							const userAttributes = loggedInUser.challengeParam.userAttributes;
 
-						const userAttributes = loggedInUser.challengeParam.userAttributes;
+							if (Boolean(Number(userAttributes['custom:is_admin']))) {
+								await API({
+									url: '/api/create-admin',
+									method: 'POST',
+									data: {
+										id: loggedInUser.username,
+										email: userAttributes.email,
+										location: userAttributes['custom:designation'],
+									},
+								});
+							}
 
-						updateUserAttributes({
-							email: userAttributes.email,
-							firstName: userAttributes.given_name,
-							lastName: userAttributes.family_name,
-							sub: loggedInUser.username,
-							isAdmin: Boolean(Number(userAttributes['custom:is_admin'])),
-							isSuperUser: Boolean(Number(userAttributes['custom:is_superuser'])),
-							isTechnician: Boolean(Number(userAttributes['custom:is_technician'])),
-							designation: userAttributes['custom:designation'],
-						});
+							updateUserAttributes({
+								email: userAttributes.email,
+								firstName: userAttributes.given_name,
+								lastName: userAttributes.family_name,
+								sub: loggedInUser.username,
+								isAdmin: Boolean(Number(userAttributes['custom:is_admin'])),
+								isSuperUser: Boolean(Number(userAttributes['custom:is_superuser'])),
+								isTechnician: Boolean(Number(userAttributes['custom:is_technician'])),
+								designation: userAttributes['custom:designation'],
+							});
 
-						const session = await Auth.currentSession();
-						const access_token = session.getAccessToken().getJwtToken();
-						updateAccessToken(access_token);
-						updateIsLoggedIn(true);
-						router.push('/');
+							const session = await Auth.currentSession();
+							const access_token = session.getAccessToken().getJwtToken();
+							updateAccessToken(access_token);
+							updateIsLoggedIn(true);
+							router.push('/');
+						} catch (error: any) {
+							setShowNewPassword(false);
+							toast.error((error && error.message) || 'Something went wrong, please try again', {
+								position: toast.POSITION.TOP_RIGHT,
+							});
+						}
 					})}
 				>
 					<Modal.Body>

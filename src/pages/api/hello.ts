@@ -1,6 +1,7 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { CognitoIdentityProviderClient, AdminCreateUserCommand } from '@aws-sdk/client-cognito-identity-provider';
+import { prisma } from '@/lib/primsa';
 
 const client = new CognitoIdentityProviderClient();
 
@@ -49,9 +50,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 	const command = new AdminCreateUserCommand(input);
 	try {
-		const response = await client.send(command);
+		await client.send(command);
 
-		res.status(200).json({ response });
+		res.status(200).json({ ok: true });
 	} catch (error) {
 		return res.status(500).json({ error, message: 'Something went wrong, please try again' });
 	}
