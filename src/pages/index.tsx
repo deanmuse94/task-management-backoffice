@@ -45,6 +45,7 @@ import * as yup from 'yup';
 import TechnicianList from '@/components/TechnicianList';
 import dateFormat from 'dateformat';
 import AssignTechnician from '@/components/AssingTechnician';
+import TechnicianView from '@/components/TechnicianView';
 
 export interface IFaults {
 	faults: {
@@ -83,7 +84,9 @@ export default function Home() {
 	const [modal, setModal] = useState<{ open: boolean; type: 'add-technician' | 'action-fault' | '' }>({ open: false, type: '' });
 	const [faultData, setFaultData] = useState<any>();
 
-	const { data, error, isLoading } = useSWR<IFaults>(user && { url: `/api/get-faults?id=${user?.sub}` });
+	const { data, error, isLoading } = useSWR<IFaults>(
+		user && { url: user.isAdmin ? `/api/get-faults?id=${user?.sub}` : `/api/get-technician-faults?id=${user?.sub}` },
+	);
 
 	const handleLogout = async () => {
 		await Auth.signOut();
@@ -136,7 +139,7 @@ export default function Home() {
 				</Text>
 				<TabGroup className="mt-6">
 					<TabList>
-						<Tab>Page 1</Tab>
+						<Tab>Customer faults</Tab>
 					</TabList>
 					<TabPanels>
 						<TabPanel>
@@ -318,6 +321,6 @@ export default function Home() {
 				</Modal>
 			</Container>
 		);
-	else if (user && user?.isTechnician) return 'technician view';
+	else if (user && user?.isTechnician) return <TechnicianView user={user} data={data} />;
 	else return <NotFound />;
 }
