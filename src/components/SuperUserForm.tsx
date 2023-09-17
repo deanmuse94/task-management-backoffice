@@ -5,6 +5,9 @@ import * as yup from 'yup';
 import { useState } from 'react';
 import { API } from '@/lib/API';
 import { toast } from 'react-toastify';
+import { Auth } from 'aws-amplify';
+import { useAccount } from '@/store/useAccount';
+import { useRouter } from 'next/router';
 
 interface SignupInputs {
 	first_name: string;
@@ -25,6 +28,9 @@ const SignupSchema = yup
 
 export default function SuperUserForm() {
 	const [role, setRole] = useState('');
+	const updateUser = useAccount((state) => state.updateAttributes);
+	const updateToken = useAccount((state) => state.updateAccessToken);
+	const router = useRouter();
 	const {
 		register,
 		handleSubmit,
@@ -51,11 +57,24 @@ export default function SuperUserForm() {
 		}
 	};
 
+	const handleLogout = async () => {
+		try {
+			await Auth.signOut();
+			router.push('/login');
+			updateUser(null);
+			updateToken('');
+		} catch (error: any) {
+			toast.error((error && error.message) || 'Something went wrong, please try again', {
+				position: toast.POSITION.TOP_RIGHT,
+			});
+		}
+	};
+
 	const roleCheck = (role === 'admin' || role === 'technician') && !watch('designation');
 
 	return (
 		<>
-			<h5 className="text-center mb-4">Create a super user, admin or technician</h5>
+			<h5 className="text-center mb-4 mt-12">Create a super user, admin or technician</h5>
 			<Card className="w-[450px] mx-auto max-w-[90%]">
 				<form onSubmit={handleSubmit(onSubmit)}>
 					<div className="mb-3">
@@ -104,7 +123,6 @@ export default function SuperUserForm() {
 						<Select placeholder="Select role" onValueChange={setRole}>
 							<SelectItem value="super_user">Super user</SelectItem>
 							<SelectItem value="admin">Exchange admin</SelectItem>
-							<SelectItem value="technician">Technician</SelectItem>
 						</Select>
 					</div>
 					<Button type="submit" className="border-0 w-full" disabled={roleCheck || !role} loading={isSubmitting}>
@@ -112,6 +130,11 @@ export default function SuperUserForm() {
 					</Button>
 				</form>
 			</Card>
+			<div className="w-full flex justify-center mt-8">
+				<Button className="border-0 w-20 text-center" onClick={() => handleLogout()}>
+					Logout
+				</Button>
+			</div>
 		</>
 	);
 }

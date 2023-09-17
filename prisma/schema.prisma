@@ -30,7 +30,6 @@ model User {
     address        String
     email          String
     account_number String
-    location       String
     Fault          Fault[]
     admin_id       String
     admin          Admin?  @relation(fields: [admin_id], references: [id])

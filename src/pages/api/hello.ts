@@ -37,10 +37,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 				Value: role === 'super_user' ? '1' : '0',
 			},
 			{
-				Name: 'custom:is_technician',
-				Value: role === 'technician' ? '1' : '0',
-			},
-			{
 				Name: 'custom:designation',
 				Value: !!designation ? designation : '',
 			},

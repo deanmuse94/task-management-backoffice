@@ -121,7 +121,7 @@ export default function Home() {
 		Shipped: 'emerald',
 	};
 
-	if (user && user?.isAdmin)
+	if (user && user?.isSuperUser)
 		return (
 			<Container>
 				<SuperUserForm />
